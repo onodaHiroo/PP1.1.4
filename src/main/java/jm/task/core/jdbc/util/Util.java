@@ -22,6 +22,6 @@ public class Util {
         } catch (ClassNotFoundException | SQLException ex) {
             LOGGER.log(Level.SEVERE, "При подключении к базе данных произошла ошибка.", ex);
         }
-    return connection;
+        return connection;
     }
 }
