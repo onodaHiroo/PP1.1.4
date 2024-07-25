@@ -1,5 +1,11 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.model.User;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -12,6 +18,9 @@ public class Util {
     private static final String USER = "root";
     private static final String PASSWORD = "rootlocalhost123";
     private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
+    private static final String DIALECT = "org.hibernate.dialect.MySQLDialect";
+
+    private static SessionFactory sessionFactory;
 
     public static Connection getConnection() {
         Connection connection = null;
@@ -23,5 +32,29 @@ public class Util {
             LOGGER.log(Level.SEVERE, "При подключении к базе данных произошла ошибка.", ex);
         }
         return connection;
+    }
+
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            try {
+                Configuration configuration = new Configuration()
+                        .setProperty("hibernate.connection.driver_class", DRIVER)
+                        .setProperty("hibernate.connection.url", URL)
+                        .setProperty("hibernate.connection.username", USER)
+                        .setProperty("hibernate.connection.password", PASSWORD)
+                        .setProperty("hibernate.dialect", DIALECT)
+                        .addAnnotatedClass(User.class);
+
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties()).build();
+
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+                LOGGER.log(Level.FINE, "SessionFactory создана.");
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "Не удалось создать SessionFactory.", ex);
+            }
+        }
+
+        return sessionFactory;
     }
 }
